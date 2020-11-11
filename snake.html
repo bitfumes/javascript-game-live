@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h2>Javascript Snake Game</h2>
+      <canvas
+        id="canvas"
+        width="300"
+        height="300"
+        style="border: 1px solid black"
+      ></canvas>
+
+      <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        let rightPressed = (leftPressed = upPressed = downPressed = false);
+
+        let snake = [
+          { x: 110, y: 100 },
+          { x: 105, y: 100 },
+          { x: 100, y: 100 },
+        ];
+        let food = {};
+        let snakeW = (snakeH = 5);
+        let interval = null;
+        createRandomFoodPosition();
+        drawSnake();
+        moveSnake();
+        navigateSnake();
+        drawFood();
+
+        function createRandomFoodPosition() {
+          const x = Math.floor((Math.random() * 300) / 10) * snakeW;
+          const y = Math.floor((Math.random() * 300) / 10) * snakeW;
+          food.x = x;
+          food.y = y;
+        }
+
+        function drawFood() {
+          console.log(food);
+          ctx.beginPath();
+          ctx.rect(food.x, food.y, snakeW, snakeH);
+          ctx.fillStyle = "blue";
+          ctx.fill();
+          ctx.closePath();
+        }
+
+        function drawSnake() {
+          snake.forEach((rect) => {
+            ctx.beginPath();
+            ctx.rect(rect.x, rect.y, snakeW, snakeH);
+            ctx.fillStyle = "black";
+            ctx.fill();
+            ctx.closePath();
+          });
+        }
+
+        function moveSnake() {
+          let dx = snakeW;
+          let dy = 0;
+          interval = setInterval(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            collisionDetection();
+            if (downPressed) {
+              dy = snakeW;
+              dx = 0;
+            }
+            if (rightPressed) {
+              dy = 0;
+              dx = snakeW;
+            }
+            if (leftPressed) {
+              dy = 0;
+              dx = -snakeW;
+            }
+            if (upPressed) {
+              dy = -snakeW;
+              dx = 0;
+            }
+
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+            snake.pop();
+
+            drawSnake();
+            drawFood();
+          }, 50);
+        }
+
+        function collisionDetection() {
+          const topCollision = snake[0].y < 0;
+          const bottomCollision = snake[0].y + snakeH > canvas.height;
+          const leftCollision = snake[0].x < 0;
+          const rightCollision = snake[0].x + snakeW > canvas.width;
+          if (
+            topCollision ||
+            bottomCollision ||
+            leftCollision ||
+            rightCollision
+          ) {
+            alert("Game Over !!");
+            clearInterval(interval);
+          }
+
+          //   Food Collision
+          if (snake[0].x == food.x && snake[0].y == food.y) {
+            growSnake();
+            createRandomFoodPosition();
+          }
+        }
+
+        function growSnake() {
+          snake.push({ x: food.x, y: food.y });
+        }
+
+        function navigateSnake() {
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowRight") {
+              rightPressed = true;
+            }
+            if (e.key === "ArrowLeft") {
+              leftPressed = true;
+            }
+            if (e.key === "ArrowUp") {
+              upPressed = true;
+            }
+            if (e.key === "ArrowDown") {
+              downPressed = true;
+            }
+          });
+          document.addEventListener("keyup", (e) => {
+            if (e.key === "ArrowRight") {
+              rightPressed = false;
+            }
+            if (e.key === "ArrowLeft") {
+              leftPressed = false;
+            }
+            if (e.key === "ArrowUp") {
+              upPressed = false;
+            }
+            if (e.key === "ArrowDown") {
+              downPressed = false;
+            }
+          });
+        }
+      </script>
+    </div>
+  </body>
+</html>
